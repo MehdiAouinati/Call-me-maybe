@@ -1,5 +1,5 @@
 class BuildPrompt:
-    def __init__(self, prompts, funcs)
+    def __init__(self, prompts, funcs):
         self.prompts = prompts
         self.funcs = funcs
     

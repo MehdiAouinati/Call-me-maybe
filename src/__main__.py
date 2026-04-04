@@ -2,6 +2,7 @@ import argparse
 from .loader import Parse
 import numpy as np
 from pydantic import ValidationError
+from .buildPrompt import BuildPrompt
 
 
 if __name__ == "__main__":
@@ -14,9 +15,16 @@ if __name__ == "__main__":
     try:
         prompts_list = load.load_prompts(args.input)
         funcs_list = load.load_functions(args.functions_definition)
-        func = [item.model_dump() for item in funcs_list]
-        promts = [item.model_dump() for item in prompts_list]
-    except ValidationError
+        funcs = [item.model_dump() for item in funcs_list]
+        prompts = [item.model_dump() for item in prompts_list]
+    except ValidationError as e:
+        print(e)
+        exit(1)
+    
+    createPrompt = BuildPrompt(prompts, funcs)
+    prompt = createPrompt.build_prompt("What is the sum of 2 and 3?")
+    print(prompt)
+
 
 
 

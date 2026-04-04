@@ -32,7 +32,7 @@ class Parse:
                 data = json.load(file)
             
             prompts = []
-            for item in jsn:
+            for item in data:
                 try:
                     prompt = parsing.FunctionCall.model_validate(item)
                     prompts.append(prompt)
