@@ -3,6 +3,7 @@ from .loader import Parse
 import numpy as np
 from pydantic import ValidationError
 from .buildPrompt import BuildPrompt
+from .decoder import Creating
 
 
 if __name__ == "__main__":
@@ -23,7 +24,9 @@ if __name__ == "__main__":
     
     createPrompt = BuildPrompt(prompts, funcs)
     prompt = createPrompt.build_prompt("What is the sum of 2 and 3?")
-    print(prompt)
+    starting = Creating()
+    starting.generate(prompt, "valid")
+
 
 
 
