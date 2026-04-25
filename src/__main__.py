@@ -3,7 +3,7 @@ from .loader import Parse
 import numpy as np
 from pydantic import ValidationError
 from .buildPrompt import BuildPrompt
-from .decoder import Creating
+from .decoder import Prediction
 from llm_sdk import Small_LLM_Model
 import torch
 
@@ -23,18 +23,23 @@ if __name__ == "__main__":
     except ValidationError as e:
         print(e)
         exit(1)
-
+    
     model = Small_LLM_Model()
-    createPrompt = BuildPrompt(prompts, funcs)
-    prompt = createPrompt.build_prompt("Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS")
+
     fun = []
     fun.append(["fn_add_numbers"])
     fun.append(["fn_greet"])
     fun.append(["fn_reverse_string"])
     fun.append(["fn_get_square_root"])
     fun.append(["fn_substitute_string_with_regex"])
-    starting = Creating(fun, model)
-    starting.generate_name(prompt)
+
+    user_input = "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
+    createPrompt = BuildPrompt(prompts, funcs)
+    prompt = createPrompt.build_prompt(user_input)
+
+    predict = Prediction(fun, model, prompt)
+    predict.predict_prompt(user_input)
+    predict.predict_name()
 
 
 

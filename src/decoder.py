@@ -1,10 +1,11 @@
 import numpy as np
 
 
-class Creating:
-    def __init__(self, functions, model):
+class Prediction:
+    def __init__(self, functions, model, prompt):
         self.model = model
         self.funcs = functions
+        self.prompt = prompt
         self.all_fun = []
         self.convert()
 
@@ -35,9 +36,9 @@ class Creating:
             return list(set(res))
 
 
-    def generate_name(self, prompt: str) -> str:#handle if prompt doesn't exist .
+    def predict_name(self) -> str:#handle if prompt doesn't exist .
         prefix_ids = self.model.encode('"name": ').tolist()[0]
-        current_tokens = self.model.encode(prompt).tolist()[0]
+        current_tokens = self.model.encode(self.prompt).tolist()[0]
         generated_tokens = []
 
         for i in range(10):
@@ -57,5 +58,26 @@ class Creating:
             next_token = int(np.argmax(logits + mask))
             current_tokens.append(next_token)
             generated_tokens.append(next_token)
-            
+        
         print(self.model.decode(generated_tokens))
+        return self.model.decode(generated_tokens)
+
+
+    def predict_prompt(self, user_input):
+        prefix_ids = self.model.encode('{"prompt": ').tolist()[0]
+        current_tokens = self.model.encode(self.prompt).tolist()[0]
+        generated_tokens = []
+
+        for i in range(len(prefix_ids)):
+            logits = self.model.get_logits_from_input_ids(current_tokens)
+            mask = np.full_like(logits, float("-inf"))#read about it 
+            mask[prefix_ids[i]] = 0
+
+            next_token = int(np.argmax(logits + mask))#read about it
+            current_tokens.append(next_token)
+            generated_tokens.append(next_token)
+
+        res = self.model.decode(generated_tokens)
+        res += user_input
+        print(res)
+        return res
