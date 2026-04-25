@@ -27,15 +27,15 @@ class BuildPrompt:
 
         lines.append("\nEXAMPLES:")
         lines.append("User: What is the sum of 2 and 3?")
-        lines.append('Result: {"name": "fn_add_numbers", "parameters": {"a": 10, "b": 20}}')
+        lines.append('Result:{"prompt": "What is the sum of 2 and 3?", "name": "fn_add_numbers", "parameters": {"a": 10, "b": 20}}')
 
         lines.append("\nuser: Greet john")
-        lines.append('Result: {"name": "fn_greet", "parameters": {"name": "Alice"}}')
+        lines.append('Result:{"prompt": "Greet john", "name": "fn_greet", "parameters": {"name": "Alice"}}')
 
         lines.append(f"\nUser request:\n\"{user_prompt}\"")
 
         lines.append("\nResult:")
-        lines.append('{"name":')
+        lines.append('{"prompt":')
 
         return "\n".join(lines)
 

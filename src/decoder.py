@@ -1,67 +1,61 @@
-from llm_sdk import Small_LLM_Model
 import numpy as np
-import torch
 
-# class Creating:
-#     def generate(self, prompt: str, valid_tokens_fn) -> str:
-#         # 1. encode the prompt
-#         model = Small_LLM_Model()
-#         tokens = model.encode(prompt)
-#         # 2. get logits
-#         tokens_list = tokens.tolist()[0]
-#         logits = model.get_logits_from_input_ids(tokens_list)
-        # 3. call valid_tokens_fn to get the mask
-
-        # 4. apply mask
-        # 5. argmax → winner token id
-        # 6. look up winner in vocab
-        # 7. append to output string
-        # 8. re-encode prompt + output so far
-        # 9. repeat from step 2
-        # 10. stop when output string ends with "}}"
-        # return the complete JSON string
 
 class Creating:
-    def generate(self, prompt: str, valid_tokens_fn) -> str:
-        model = Small_LLM_Model()
-        current_tokens = model.encode(prompt).tolist()[0]
-        generated_tokens = [] 
+    def __init__(self, functions, model):
+        self.model = model
+        self.funcs = functions
+        self.all_fun = []
+        self.convert()
 
-        for i in range(5):
-            logits = model.get_logits_from_input_ids(current_tokens)
-            vocab_size = len(logits)
-            # Pick the winner
-            if i == 0:
-                mask = np.full(vocab_size, -1e9)
-                mask[90] = 1
-                next_token = int(np.argmax(mask))
-            elif i == 1:
-                mask = np.full(vocab_size, -1e9)
-                mask[1] = 1
-                next_token = int(np.argmax(mask))
-            elif i == 2:
-                mask = np.full(vocab_size, -1e9)
-                mask[606] = 1
-                next_token = int(np.argmax(mask))
-            elif i == 3:
-                mask = np.full(vocab_size, -1e9)
-                mask[1] = 1
-                next_token = int(np.argmax(mask))
-            elif i == 4:
-                mask = np.full(vocab_size, -1e9)
-                mask[25] = 1
-                next_token = int(np.argmax(mask))
+
+    def convert(self):
+        for f in self.funcs:
+            check = self.model.encode(f).tolist()[0][0]
+            self.all_fun.append(check)
+
+
+    def valid_tokens_fn(self, generated_text):
+        if not generated_text:
+            res = []
+            for fun in self.all_fun:
+                if len(fun) > 0:
+                    res.append(fun[0])
+            return list(set(res))
+        else:
+            # current_gen_ids = model.encode(generated_text).tolist()[0]
+            pos = len(generated_text)
+            
+            res = []
+            for fun in self.all_fun:
+                if fun[:pos] == generated_text:
+                    if pos < len(fun):
+                        res.append(fun[pos])
+            
+            return list(set(res))
+
+
+    def generate_name(self, prompt: str) -> str:#handle if prompt doesn't exist .
+        prefix_ids = self.model.encode('"name": ').tolist()[0]
+        current_tokens = self.model.encode(prompt).tolist()[0]
+        generated_tokens = []
+
+        for i in range(10):
+            logits = self.model.get_logits_from_input_ids(current_tokens)
+            mask = np.full_like(logits, float("-inf"))
+
+            if i < len(prefix_ids):
+                mask[prefix_ids[i]] = 0 
             else:
-                next_token = int(np.argmax(logits))
-            # ADD TO BOTH: 
-            # 1. Add to history so AI can 'remember' it for the next loop
+                allowed = self.valid_tokens_fn(generated_tokens[len(prefix_ids):])
+                if allowed:
+                    for a in allowed:
+                        mask[a] = 0
+                else:
+                    break 
+
+            next_token = int(np.argmax(logits + mask))
             current_tokens.append(next_token)
-            # 2. Add to your basket so you can see it later
             generated_tokens.append(next_token)
             
-            # OPTIONAL: Print it immediately to see it happening live
-            # print(f"AI chose token ID: {next_token} -> '{model.decode([next_token])}'")
-
-        # Return ONLY what the AI created
-        # print(model.decode(generated_tokens))
-        return model.decode(generated_tokens)
+        print(self.model.decode(generated_tokens))
