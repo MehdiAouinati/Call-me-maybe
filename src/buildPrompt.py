@@ -24,6 +24,13 @@ class BuildPrompt:
                     param[k] = vv
 
             lines.append(f"- {fun['name']}: Parameters {param}: {fun['description']}")
+        
+        lines.append("""- fn_no_valid_tool_found: Use this function ONLY when 
+            the user's request cannot be fulfilled by any other available tool.
+            This includes general conversation, questions about topics not
+            covered by other functions(like weather, news, or history), or
+            when the user's intent is unclear. Selecting this prevents
+            incorrect tool usage.""")
 
         lines.append("\nEXAMPLES:")
         lines.append("User: What is the sum of 2 and 3?")

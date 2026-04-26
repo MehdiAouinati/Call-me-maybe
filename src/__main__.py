@@ -27,19 +27,22 @@ if __name__ == "__main__":
     model = Small_LLM_Model()
 
     fun = []
-    fun.append(["fn_add_numbers"])
-    fun.append(["fn_greet"])
-    fun.append(["fn_reverse_string"])
-    fun.append(["fn_get_square_root"])
-    fun.append(["fn_substitute_string_with_regex"])
+    fun.append(['fn_add_numbers",'])
+    fun.append(['fn_greet",'])
+    fun.append(['fn_reverse_string",'])
+    fun.append(['fn_get_square_root",'])
+    fun.append(['fn_substitute_string_with_regex",'])
+    fun.append(['fn_no_valid_tool_found",'])
 
-    user_input = "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
+    user_input = "What is the sum of 2 and 3?"
     createPrompt = BuildPrompt(prompts, funcs)
     prompt = createPrompt.build_prompt(user_input)
 
     predict = Prediction(fun, model, prompt)
+    num_tokens = predict.number_tokens()
     predict.predict_prompt(user_input)
-    predict.predict_name()
+    name = predict.predict_name()
+    predict.predict_param(name, num_tokens)
 
 
 
