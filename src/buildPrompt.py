@@ -42,7 +42,7 @@ class BuildPrompt:
         lines.append(f"\nUser request:\n\"{user_prompt}\"")
 
         lines.append("\nResult:")
-        lines.append('{"prompt":')
+        lines.append('"name": "')
 
         return "\n".join(lines)
 

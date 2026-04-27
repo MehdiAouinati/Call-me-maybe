@@ -3,7 +3,7 @@ from .loader import Parse
 import numpy as np
 from pydantic import ValidationError
 from .buildPrompt import BuildPrompt
-from .decoder import Prediction
+from .decodernew import Decoder
 from llm_sdk import Small_LLM_Model
 import torch
 
@@ -27,22 +27,22 @@ if __name__ == "__main__":
     model = Small_LLM_Model()
 
     fun = []
-    fun.append(['fn_add_numbers",'])
-    fun.append(['fn_greet",'])
-    fun.append(['fn_reverse_string",'])
-    fun.append(['fn_get_square_root",'])
-    fun.append(['fn_substitute_string_with_regex",'])
-    fun.append(['fn_no_valid_tool_found",'])
+    fun.append(['fn_add_numbers'])
+    fun.append(['fn_greet'])
+    fun.append(['fn_reverse_string'])
+    fun.append(['fn_get_square_root'])
+    fun.append(['fn_substitute_string_with_regex'])
+    fun.append(['fn_no_valid_tool_found'])
 
     user_input = "What is the sum of 2 and 3?"
     createPrompt = BuildPrompt(prompts, funcs)
     prompt = createPrompt.build_prompt(user_input)
 
-    predict = Prediction(fun, model, prompt)
-    num_tokens = predict.number_tokens()
-    predict.predict_prompt(user_input)
-    name = predict.predict_name()
-    predict.predict_param(name, num_tokens)
+    predict = Decoder(fun, model, prompt)
+    # num_tokens = predict.number_tokens()
+    # predict.predict_prompt(user_input)
+    # name = predict.predict_name()
+    predict.predict_param("fn_add_numbers")
 
 
 
