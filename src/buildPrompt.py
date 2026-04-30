@@ -1,3 +1,6 @@
+import numpy as np
+import json
+
 class BuildPrompt:
     def __init__(self, prompts, funcs):
         self.prompts = prompts
@@ -5,7 +8,6 @@ class BuildPrompt:
     
     def build_prompt(self, user_prompt):
         lines = []
-
         lines.append("Your task:")
         lines.append("You are a function-calling assistant. Based on the User Question, select the most appropriate function from the list below and provide its arguments in JSON format.")
 
@@ -34,15 +36,17 @@ class BuildPrompt:
 
         lines.append("\nEXAMPLES:")
         lines.append("User: What is the sum of 2 and 3?")
-        lines.append('Result:{"prompt": "What is the sum of 2 and 3?", "name": "fn_add_numbers", "parameters": {"a": 10, "b": 20}}')
+        lines.append('Result:{"prompt": "What is the sum of 2 and 3?", "name": "fn_add_numbers", "parameters": {"a": 2, "b": 3.}}')
 
         lines.append("\nuser: Greet john")
-        lines.append('Result:{"prompt": "Greet john", "name": "fn_greet", "parameters": {"name": "Alice"}}')
+        lines.append('Result:{"prompt": "Greet mehdi", "name": "fn_greet", "parameters": {"name": "mehdi".}}')
 
         lines.append(f"\nUser request:\n\"{user_prompt}\"")
 
+        lines.append(f"\n when you finish always finish it with point = (.) like 2. ")
+
         lines.append("\nResult:")
-        lines.append('"name": "')
+        lines.append(f'{{"prompt": {user_prompt}, "name": ')
 
         return "\n".join(lines)
 

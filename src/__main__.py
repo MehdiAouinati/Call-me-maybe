@@ -34,7 +34,7 @@ if __name__ == "__main__":
     fun.append(['fn_substitute_string_with_regex'])
     fun.append(['fn_no_valid_tool_found'])
 
-    user_input = "What is the sum of 2 and 3?"
+    user_input = "Greet shrek"
     createPrompt = BuildPrompt(prompts, funcs)
     prompt = createPrompt.build_prompt(user_input)
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     # num_tokens = predict.number_tokens()
     # predict.predict_prompt(user_input)
     # name = predict.predict_name()
-    predict.predict_param("fn_add_numbers")
+    predict.predict_param("fn_greet", user_input)
 
 
 
