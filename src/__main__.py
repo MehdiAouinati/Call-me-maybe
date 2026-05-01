@@ -6,6 +6,7 @@ from .buildPrompt import BuildPrompt
 from .decodernew import Decoder
 from llm_sdk import Small_LLM_Model
 import torch
+import json
 
 
 if __name__ == "__main__":
@@ -25,16 +26,22 @@ if __name__ == "__main__":
         exit(1)
     
     model = Small_LLM_Model()
+    with open(args.functions_definition, "r") as file:
+        data = json.load(file)
 
     fun = []
-    fun.append(['fn_add_numbers'])
-    fun.append(['fn_greet'])
-    fun.append(['fn_reverse_string'])
-    fun.append(['fn_get_square_root'])
-    fun.append(['fn_substitute_string_with_regex'])
-    fun.append(['fn_no_valid_tool_found'])
+    for a in data:
+        fun.append([a["name"]])
 
-    user_input = "Greet shrek"
+    # fun = []
+    # fun.append(['fn_add_numbers'])
+    # fun.append(['fn_greet'])
+    # fun.append(['fn_reverse_string'])
+    # fun.append(['fn_get_square_root'])
+    # fun.append(['fn_substitute_string_with_regex'])
+    # fun.append(['fn_no_valid_tool_found'])
+
+    user_input = "Replace all vowels in 'Programming is fun' with asterisks"
     createPrompt = BuildPrompt(prompts, funcs)
     prompt = createPrompt.build_prompt(user_input)
 
@@ -42,7 +49,7 @@ if __name__ == "__main__":
     # num_tokens = predict.number_tokens()
     # predict.predict_prompt(user_input)
     # name = predict.predict_name()
-    predict.predict_param("fn_greet", user_input)
+    predict.predict_param("fn_substitute_string_with_regex", data)
 
 
 

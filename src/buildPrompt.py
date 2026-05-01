@@ -36,17 +36,16 @@ class BuildPrompt:
 
         lines.append("\nEXAMPLES:")
         lines.append("User: What is the sum of 2 and 3?")
-        lines.append('Result:{"prompt": "What is the sum of 2 and 3?", "name": "fn_add_numbers", "parameters": {"a": 2, "b": 3.}}')
+        lines.append('Result:{"prompt": "What is the sum of 2 and 3?", "name": "fn_add_numbers", "parameters": {"a": 2, "b": 3}.}')
 
         lines.append("\nuser: Greet john")
-        lines.append('Result:{"prompt": "Greet mehdi", "name": "fn_greet", "parameters": {"name": "mehdi".}}')
+        lines.append('Result:{"prompt": "Greet mehdi", "name": "fn_greet", "parameters": {"name": "mehdi"}.}')
 
         lines.append(f"\nUser request:\n\"{user_prompt}\"")
 
-        lines.append(f"\n when you finish always finish it with point = (.) like 2. ")
 
         lines.append("\nResult:")
-        lines.append(f'{{"prompt": {user_prompt}, "name": ')
+        lines.append(f'{{"prompt": "{user_prompt}", "name": ')
 
         return "\n".join(lines)
 
