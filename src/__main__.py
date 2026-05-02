@@ -1,10 +1,10 @@
-import argparse
-from .loader import Parse
-import numpy as np
-from pydantic import ValidationError
-from .buildPrompt import BuildPrompt
-from .decodernew import Decoder
 from llm_sdk import Small_LLM_Model
+from .buildPrompt import BuildPrompt
+from .decoder import Decoder
+from .loader import Parse
+from pydantic import ValidationError
+import numpy as np
+import argparse
 import torch
 import json
 
@@ -24,32 +24,39 @@ if __name__ == "__main__":
     except ValidationError as e:
         print(e)
         exit(1)
-    
+
     model = Small_LLM_Model()
-    with open(args.functions_definition, "r") as file:
-        data = json.load(file)
 
-    fun = []
-    for a in data:
-        fun.append([a["name"]])
+    funs = []
+    for fun_name in funcs_list:
+        funs.append(fun_name.name)
 
-    # fun = []
-    # fun.append(['fn_add_numbers'])
-    # fun.append(['fn_greet'])
-    # fun.append(['fn_reverse_string'])
-    # fun.append(['fn_get_square_root'])
-    # fun.append(['fn_substitute_string_with_regex'])
-    # fun.append(['fn_no_valid_tool_found'])
-
-    user_input = "Replace all vowels in 'Programming is fun' with asterisks"
     createPrompt = BuildPrompt(prompts, funcs)
-    prompt = createPrompt.build_prompt(user_input)
+    predictor = Decoder(funs, model)
 
-    predict = Decoder(fun, model, prompt)
-    # num_tokens = predict.number_tokens()
-    # predict.predict_prompt(user_input)
-    # name = predict.predict_name()
-    predict.predict_param("fn_substitute_string_with_regex", data)
+    for p in prompts_list:
+        output = {
+            "prompt": None,
+            "name": None,
+            "parameters" : None
+        }
+
+        prompt = createPrompt.build_prompt(p.prompt)
+        function_name = predictor.predict_name(prompt)
+        params = predictor.predict_param(function_name, funcs_list)
+
+        output["prompt"] = p.prompt
+        output["name"] = function_name
+        output["parameters"] = params
+
+
+    # user_input = "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
+    # prompt = createPrompt.build_prompt(user_input)
+    # predict = Decoder(fun, model, prompt)
+    # # num_tokens = predict.number_tokens()
+    # # predict.predict_prompt(user_input)
+    # # name = predict.predict_name()
+    # predict.predict_param("fn_substitute_string_with_regex", data)
 
 
 

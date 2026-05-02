@@ -17,6 +17,8 @@ class BuildPrompt:
         lines.append("- Do NOT add explanations")
         lines.append("- Do NOT add extra text")
         lines.append("- Output MUST be a single JSON object.")
+        lines.append("- For regex patterns: digits/numbers → \\d+, vowels → [aeiou], specific word like 'cat' → cat, spaces → \\s+, letters → [a-zA-Z]+")
+        lines.append("- Extract arguments exactly as they appear in the user request.")
 
         lines.append("\nAvailable functions:")
         for fun in self.funcs:
@@ -36,10 +38,17 @@ class BuildPrompt:
 
         lines.append("\nEXAMPLES:")
         lines.append("User: What is the sum of 2 and 3?")
-        lines.append('Result:{"prompt": "What is the sum of 2 and 3?", "name": "fn_add_numbers", "parameters": {"a": 2, "b": 3}.}')
+        lines.append('Result:{"prompt": "What is the sum of 2 and 3?", "name": "fn_add_numbers", "parameters": {"a": 2, "b": 3}}')
 
         lines.append("\nuser: Greet john")
-        lines.append('Result:{"prompt": "Greet mehdi", "name": "fn_greet", "parameters": {"name": "mehdi"}.}')
+        lines.append('Result:{"prompt": "Greet mehdi", "name": "fn_greet", "parameters": {"name": "mehdi"}}')
+
+        lines.append("\nuser: Substitute the word 'cat' with 'dog' in 'The cat sat on the mat with another cat'")
+        lines.append('Result:{"prompt": "Substitute the word "cat" with "dog" in "The cat sat on the mat with another cat"",') 
+        lines.append('"name": "fn_substitute_string_with_regex", "parameters": {"source_string": "The cat sat on the mat with another cat", "regex": "cat", "replacement": "dog"}}')
+        lines.append("\nuser: Replace all numbers in \"Hello 34 I\'m 233 years old\" with NUMBERS")
+        lines.append('Result:{"prompt": "Replace all numbers in \"Hello 34 I\'m 233 years old\" with NUMBERS",') 
+        lines.append('"name": "fn_substitute_string_with_regex", "parameters": {"source_string": "\"Hello 34 I\'m 233 years old\"", "regex": "\\d+", "replacement": "NUMBERS"}}')
 
         lines.append(f"\nUser request:\n\"{user_prompt}\"")
 
@@ -48,28 +57,3 @@ class BuildPrompt:
         lines.append(f'{{"prompt": "{user_prompt}", "name": ')
 
         return "\n".join(lines)
-
-
-### EXAMPLES
-# User: What is 10 plus 20?
-# Result: {"name": "fn_add_numbers", "parameters": {"a": 10, "b": 20}}
-
-# User: Hello to Alice!
-# Result: {"name": "fn_greet", "parameters": {"name": "Alice"}}
-
-
-# ### Task
-# You are a function-calling assistant. Based on the User Question, select the most appropriate function from the list below and provide its arguments in JSON format.
-
-# ### Available Functions
-# - fn_add_numbers(a: number, b: number): Add two numbers together and return their sum. [cite: 168]
-# - fn_greet(name: string): Generate a greeting message for a person by name. [cite: 168]
-# - fn_reverse_string(s: string): Reverse a string and return the reversed result. [cite: 168]
-# - fn_get_square_root(a: number): Calculate the square root of a number.
-# - fn_substitute_string_with_regex(source_string: string, regex: string, replacement: string): Replace all occurrences matching a regex pattern in a string.
-
-# ### User Question
-# "What is the sum of 2 and 3?" [cite: 164]
-
-# ### Result
-# {"name":

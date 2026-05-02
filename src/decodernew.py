@@ -3,7 +3,6 @@ import json
 
 
 class Decoder:
-
     def __init__(self, functions, model, prompt):
         self.model = model
         self.funcs = functions
@@ -26,7 +25,6 @@ class Decoder:
                     res.append(fun[0])
             return list(set(res))
         else:
-            # current_gen_ids = model.encode(generated_text).tolist()[0]
             pos = len(generated_text)
             
             res = []
@@ -90,11 +88,11 @@ class Decoder:
     def generate_string(self, ids):
         generated_tokens = ""
         
-        for i in range(20):
+        for i in range(50):
             logits = self.model.get_logits_from_input_ids(ids)
             next_token = int(np.argmax(logits))
             tokens = self.model.decode(next_token)
-            if "}" in tokens or "," == tokens:
+            if "}" in tokens or "," in tokens:
                 break
             ids.append(next_token)
             generated_tokens += self.model.decode(next_token)
@@ -108,6 +106,7 @@ class Decoder:
         elif param_type == "string":
             return self.generate_string(ids)
 
+
     def predict_param(self, fn_name, functions):
         full_prompt = self.prompt + f'"{fn_name}", ' + '"parameters": { '
         current_ids = self.model.encode(full_prompt).tolist()[0]
@@ -120,8 +119,8 @@ class Decoder:
             # print(param_type["type"])
             current_ids += self.model.encode(f'"{param_name}": ').tolist()[0]
             value, current_ids = self.generate_value(current_ids, param_type["type"])
-            print(value)
             params[param_name] = value
+            print(value)
         print(params)
 
             # params[param_name] = value
