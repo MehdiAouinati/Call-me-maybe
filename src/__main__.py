@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 import torch
 import json
+import sys
 
 
 if __name__ == "__main__":
@@ -23,7 +24,7 @@ if __name__ == "__main__":
         prompts = [item.model_dump() for item in prompts_list]
     except ValidationError as e:
         print(e)
-        exit(1)
+        sys.exit(1)
 
     model = Small_LLM_Model()
 
@@ -34,29 +35,30 @@ if __name__ == "__main__":
     createPrompt = BuildPrompt(prompts, funcs)
     predictor = Decoder(funs, model)
 
-    for p in prompts_list:
-        output = {
-            "prompt": None,
-            "name": None,
-            "parameters" : None
-        }
+    # for p in prompts_list:
+    output = {
+        "prompt": None,
+        "name": None,
+        "parameters" : None
+    }
 
-        prompt = createPrompt.build_prompt(p.prompt)
-        function_name = predictor.predict_name(prompt)
-        params = predictor.predict_param(function_name, funcs_list)
+    prompt = createPrompt.build_prompt("Replace all vowels in 'Programming is fun' with asterisks")
+    # print(prompt)
+    function_name = predictor.predict_name(prompt)
+    if function_name == "fn_no_valid_tool_found":
+        sys.exit("ERROR: the function doesn't exist")
+    param = predictor.predict_param(function_name, funcs_list, prompt)
+    params = {}
+    for k, v in param.items():
+        params[k] = v.strip().strip('"')
+    
 
-        output["prompt"] = p.prompt
-        output["name"] = function_name
-        output["parameters"] = params
+    output["prompt"] = "Replace all vowels in 'Programming is fun' with asterisks"
+    output["name"] = function_name
+    output["parameters"] = params
+    new = json.dumps(output)
+    print(new)
 
-
-    # user_input = "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
-    # prompt = createPrompt.build_prompt(user_input)
-    # predict = Decoder(fun, model, prompt)
-    # # num_tokens = predict.number_tokens()
-    # # predict.predict_prompt(user_input)
-    # # name = predict.predict_name()
-    # predict.predict_param("fn_substitute_string_with_regex", data)
 
 
 
