@@ -110,9 +110,12 @@ class Decoder:
             logits = self.model.get_logits_from_input_ids(ids)
             next_token = int(np.argmax(logits))
             tokens = self.model.decode(next_token)
-            
-            if '"' in tokens:
-                before_quote = tokens.split('"')[0]
+            # print(tokens)
+            if '}' in tokens or ',' in tokens:
+                if '}' in tokens:
+                    before_quote = tokens.split('}')[0]
+                else:
+                    before_quote = tokens.split(',')[0]
                 generated_tokens += before_quote
                 ids.append(next_token)
                 break
@@ -123,8 +126,8 @@ class Decoder:
 
 
     def predict_param(self, fn_name, functions, prompt):
-        full_prompt = prompt + f'"{fn_name}", ' + '"parameters": { '
-        curr_ids = self.model.encode(full_prompt).tolist()[0]
+        # full_prompt = prompt + f'"{fn_name}", ' + '"parameters": { '
+        curr_ids = self.model.encode(prompt).tolist()[0]
 
         fn_def = self.get_function_def(fn_name, functions)
         params = {}
@@ -132,11 +135,14 @@ class Decoder:
         for i, (param_name, param_type) in enumerate(fn_def.parameters.items()):
             curr_ids += self.model.encode(f'"{param_name}": ').tolist()[0]
             if param_type.type == "string":
-                curr_ids += self.model.encode('"').tolist()[0]
+                # curr_ids += self.model.encode('"').tolist()[0]
                 value, curr_ids = self.generate_string(curr_ids)
+                value = value.strip().strip('"')
             elif param_type.type == "number":
                 value, curr_ids = self.generate_number(curr_ids)
             # value, curr_ids = self.generate_value(curr_ids, param_type.type)
+            # print(value)
             params[param_name] = value
+            # print
 
         return params
