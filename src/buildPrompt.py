@@ -7,6 +7,54 @@ class BuildPrompt:
         self.funcs = funcs
 
     def build_prompt(self, user_prompt):
+        text = "You select the correct function name based on a user request.\n"
+
+        text += "\nSTRICT RULES:\n"
+        text += "- Output ONLY the function name as plain text.\n"
+        text += "- Do NOT return JSON.\n"
+        text += "- Do NOT add quotes.\n"
+        text += "- Do NOT explain.\n"
+
+        text += "\nFUNCTION RULES:\n"
+        text += "- Choose ONLY from the available functions.\n"
+        text += "- Do NOT invent new function names.\n"
+
+        text += "\nEDGE CASES:\n"
+        text += "- If the request is empty → return: null\n"
+        text += "- If no function matches → return: null\n"
+
+        text += "\nAVAILABLE FUNCTIONS:\n"
+
+        for fn in self.funcs:
+            text += f"- {fn["name"]}: {fn["description"]}\n"
+
+        text += "\nEXAMPLES:\n"
+
+        text += "Request: What is the sum of 2 and 3?\n"
+        text += "Answer:\nfn_add_numbers\n\n"
+
+        text += "Request: Greet John\n"
+        text += "Answer:\nfn_greet\n\n"
+
+        text += "Request: Reverse the string \"hello\"\n"
+        text += "Answer:\nfn_reverse_string\n\n"
+
+        text += "Request: What is the square root of 16?\n"
+        text += "Answer:\nfn_get_square_root\n\n"
+
+        text += "Request: Replace numbers in text\n"
+        text += "Answer:\nfn_substitute_string_with_regex\n\n"
+
+        text += "Request: Tell me a joke\n"
+        text += "Answer:\nnull\n\n"
+
+        text += "Request:\n"
+        text += "Answer:\nnull\n\n"
+
+        text += "\nNow select the function name.\n"
+        text += f"Request: {user_prompt}\n"
+        text += "Answer:\n"
+        return text
 
 
     def build_param_prompt(self, user_prompt, fn_def):

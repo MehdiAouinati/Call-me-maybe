@@ -31,6 +31,8 @@ if __name__ == "__main__":
     funs = []
     for fun_name in funcs_list:
         funs.append(fun_name.name)
+    funs.append("null")
+    print(funs)
 
     createPrompt = BuildPrompt(prompts, funcs)
     predictor = Decoder(funs, model)
@@ -49,23 +51,25 @@ if __name__ == "__main__":
         "parameters" : None
     }
 
-    # prompt = createPrompt.build_prompt("Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS")
-    prompt_param = createPrompt.build_param_prompt("What is the sum of 2 and 3?", funcs_list[0])
+    prompt = createPrompt.build_prompt("tell me a joke")
+    # print(prompt)
+    # prompt_param = createPrompt.build_param_prompt("What is the sum of 2 and 3?", funcs_list[0])
     # print(prompt_param)
-    # function_name = predictor.predict_name(prompt)
+    function_name = predictor.predict_name(prompt)
+    print(function_name)
     # print(function_name)
     # if function_name == "fn_no_valid_tool_found":
     #     sys.exit("ERROR: the function doesn't exist")
-    param = predictor.predict_param("fn_add_numbers", funcs_list, prompt_param)
-    print(param)
-    try:
-        json.dumps(param)
-        output["prompt"] = "What is the sum of 2 and 3?"
-        output["name"] = "fn_add_numbers"
-        output["parameters"] = param
-        all_of.append(output)
-    except (TypeError, OverflowError) as e:
-        print("❌ Invalid JSON:", e)
+    # param = predictor.predict_param("fn_add_numbers", funcs_list, prompt_param)
+    # print(param)
+    # try:
+    #     json.dumps(param)
+    #     output["prompt"] = "What is the sum of 2 and 3?"
+    #     output["name"] = "fn_add_numbers"
+    #     output["parameters"] = param
+    #     all_of.append(output)
+    # except (TypeError, OverflowError) as e:
+    #     print("❌ Invalid JSON:", e)
 
     # new = json.dumps(all_of, indent=2)
     # print(new)

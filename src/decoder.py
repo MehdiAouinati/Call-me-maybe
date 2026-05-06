@@ -11,7 +11,6 @@ class Decoder:
         self.comma = self.model.encode(',').tolist()[0][0]
         self.quote = self.model.encode('"').tolist()[0][0]
         self.close = self.model.encode('}').tolist()[0][0]
-        self.param = self.model.encode('"parameters": { ').tolist()[0][0]
         self.number_tokens_ids = self.build_number_tokens()
         self.convert()
 
