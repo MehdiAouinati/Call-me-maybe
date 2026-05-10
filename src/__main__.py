@@ -8,6 +8,7 @@ import argparse
 import torch
 import json
 import sys
+import time
 
 
 if __name__ == "__main__":
@@ -28,40 +29,62 @@ if __name__ == "__main__":
 
     model = Small_LLM_Model()
 
-    funs = []
+    #all available functions name.
+    available_function_names = []
     for fun_name in funcs_list:
-        funs.append(fun_name.name)
-    funs.append("null")
-    print(funs)
+        available_function_names.append(fun_name.name)
+    available_function_names.append("null")
 
+    #to search for spesific function def
+    function_lookup = {f.name: f for f in funcs_list}
+
+    #initialize
     createPrompt = BuildPrompt(prompts, funcs)
-    predictor = Decoder(funs, model)
+    predictor = Decoder(available_function_names, model)
 
-    all_of = []
-    # for p in prompts_list:
-    output = {
-        "prompt": None,
-        "name": None,
-        "parameters" : None
-    }
+    #build prompts
+    prompt_name = createPrompt.build_prompt()
+    prompt_param = createPrompt.build_param_prompt()
+    name_prompt = model.encode(prompt_name).tolist()[0]
+    param_prompt = model.encode(prompt_param).tolist()[0]
 
-    n = {
-        "prompt": None,
-        "name": None,
-        "parameters" : None
-    }
+    #save the data
+    all_of_dict = []
+    user_inp = "What is the sum of 2 and 3?"
 
-    prompt = createPrompt.build_prompt("tell me a joke")
-    # print(prompt)
-    # prompt_param = createPrompt.build_param_prompt("What is the sum of 2 and 3?", funcs_list[0])
-    # print(prompt_param)
-    function_name = predictor.predict_name(prompt)
-    print(function_name)
-    # print(function_name)
-    # if function_name == "fn_no_valid_tool_found":
-    #     sys.exit("ERROR: the function doesn't exist")
-    # param = predictor.predict_param("fn_add_numbers", funcs_list, prompt_param)
-    # print(param)
+
+    for p in prompts_list:
+        output = {
+            "prompt": None,
+            "name": None,
+            "parameters" : None
+        }
+
+        #predict the name of function
+        addition = model.encode(f"Request: {user_inp}\nAnswer:\n").tolist()[0]
+        function_name = predictor.predict_name(name_prompt + addition)
+        if function_name == "null":
+            sys.exit("ERROR: the function doesn't exist")
+
+        #predict - param
+        param_addition = f"Function: {function_lookup["fn_add_numbers"].name}("
+        param_addition += ", ".join(f"{name}: {schema.type}" for name, schema in function_lookup["fn_add_numbers"].parameters.items())
+        param_addition += ")\n "
+        param_addition += f"Request: {user_inp}\n"
+        param_addition += "Answer:{\n"
+        param_addition = model.encode(param_addition).tolist()[0]
+        param = predictor.predict_param("fn_add_numbers", funcs_list, param_prompt + param_addition)
+
+
+    # measure time
+    # start = time.time()
+    # end = time.time()
+    # second = end - start
+    # minutes = second / 60
+    # print(minutes)
+
+
+    #convert to json
     # try:
     #     json.dumps(param)
     #     output["prompt"] = "What is the sum of 2 and 3?"
@@ -70,43 +93,11 @@ if __name__ == "__main__":
     #     all_of.append(output)
     # except (TypeError, OverflowError) as e:
     #     print("❌ Invalid JSON:", e)
+        
 
     # new = json.dumps(all_of, indent=2)
     # print(new)
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    # n["prompt"] = "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
-    # n["name"] = "fn_substitute_string_with_regex"
-    # n["parameters"] = {"s": "string"},
-    # all_of.append(output)
-    # all_of.append(n)
-    # param = '{"a":  5}'
-    # print(all_of)
-    # try:
-    #     data = json.loads(output)
-    #     data = json.loads(n)
-    #     print("Valid JSON")
-    #     all_of.append(output)
-    #     all_of.append(n)
-    #     new = json.dumps(all_of, indent=2)
-    #     print(new)
-    # except json.JSONDecodeError as e:
-    #     print("Invalid JSON:")
 
 
 

@@ -6,7 +6,7 @@ class BuildPrompt:
         self.prompts = prompts
         self.funcs = funcs
 
-    def build_prompt(self, user_prompt):
+    def build_prompt(self):
         text = "You select the correct function name based on a user request.\n"
 
         text += "\nSTRICT RULES:\n"
@@ -52,12 +52,12 @@ class BuildPrompt:
         text += "Answer:\nnull\n\n"
 
         text += "\nNow select the function name.\n"
-        text += f"Request: {user_prompt}\n"
-        text += "Answer:\n"
+        # text += f"Request: {user_prompt}\n"
+        # text += "Answer:\n"
         return text
 
 
-    def build_param_prompt(self, user_prompt, fn_def):
+    def build_param_prompt(self):
         prompt = "You extract ONLY function parameters from a user request.\n"
 
         prompt += "\nSTRICT RULES:\n"
@@ -108,6 +108,10 @@ class BuildPrompt:
         prompt += "Request: What is the square root of 16?\n"
         prompt += 'Answer:\n{"a": 16.0}\n'
 
+        prompt += "Function: fn_get_square_root(a: number)\n"
+        prompt += "Request: Calculate the square root of 144?\n"
+        prompt += 'Answer:\n{"a": 144.0}\n'
+
         prompt += "Function: fn_substitute_string_with_regex(source_string: string, regex: string, replacement: string)\n"
         prompt += 'Request: Replace all numbers in "Hello 34 I\'m 233 years old" with NUMBERS\n'
         prompt += 'Answer:\n{"source_string": "Hello 34 I\'m 233 years old", "regex": "\\d+", "replacement": "NUMBERS"}\n'
@@ -118,10 +122,10 @@ class BuildPrompt:
 
         prompt += "\nNow extract parameters for this request.\n"
 
-        prompt += f"Function: {fn_def.name}("
-        prompt += ", ".join(f"{name}: {schema.type}" for name, schema in fn_def.parameters.items())
-        prompt += ")\n"
+        # prompt += f"Function: {fn_def.name}("
+        # prompt += ", ".join(f"{name}: {schema.type}" for name, schema in fn_def.parameters.items())
+        # prompt += ")\n"
 
-        prompt += f"Request: {user_prompt}\n"
-        prompt += "Answer:{\n"
+        # prompt += f"Request: {user_prompt}\n"
+        # prompt += "Answer:{\n"
         return prompt 
