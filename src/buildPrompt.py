@@ -1,6 +1,7 @@
 import numpy as np
 import json
 
+
 class BuildPrompt:
     def __init__(self, prompts, funcs):
         self.prompts = prompts

@@ -1,31 +1,31 @@
+from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 
 
 class Decoder:
-    def __init__(self, functions, model):
+    def __init__(self, functions: List[Any], model: Any) -> None:
         self.model = model
         self.funcs = functions
-        self.all_fun = []
-
-        self.comma = self.model.encode(',').tolist()[0][0]
-        self.quote = self.model.encode('"').tolist()[0][0]
-        self.close = self.model.encode('}').tolist()[0][0]
-        self.number_tokens_ids = self.build_number_tokens()
+        self.all_fun: List[List[int]] = []
         self.convert()
+        self.number_tokens_ids: List[List[int]] = self.build_number_tokens()
 
-    def convert(self):
+        self.close = self.model.encode('}').tolist()[0][0]
+        self.comma = self.model.encode(',').tolist()[0][0]
+
+    def convert(self) -> None:
         for f in self.funcs:
             check = self.model.encode(f).tolist()[0]
             self.all_fun.append(check)
 
-    def build_number_tokens(self):
+    def build_number_tokens(self) -> List[List[int]]:
         arr = "0123456789.-,}"
-        num = []
+        num: List[List[int]] = []
         for n in arr:
             num.append(self.model.encode(n).tolist()[0])
         return num
 
-    def valid_tokens_fn_name(self, generated_text):
+    def valid_tokens_fn_name(self, generated_text: List[int]) -> List[int]:
         if not generated_text:
             res = []
             for fun in self.all_fun:
@@ -43,9 +43,9 @@ class Decoder:
 
             return list(set(res))
 
-    def predict_name(self, tokens) -> str:
+    def predict_name(self, tokens: List[int]) -> str:
         current_tokens = tokens
-        generated_tokens = []
+        generated_tokens: list[int] = []
 
         for i in range(20):
             logits = self.model.get_logits_from_input_ids(current_tokens)
@@ -63,19 +63,13 @@ class Decoder:
 
         return self.model.decode(generated_tokens)
 
-    def get_function_def(self, fn_name, functions):
+    def get_function_def(self, fn_name: str, functions: List[Any]) -> Any:
         for fun in functions:
             if fun.name == fn_name:
                 return fun
-        return []
+        return None
 
-    def generate_value(self, ids, param_type):
-        if param_type == "number":
-            return self.generate_number(ids)
-        elif param_type == "string":
-            return self.generate_string(ids)
-
-    def generate_number(self, ids):
+    def generate_number(self, ids: List[int]) -> Tuple[float, List[int]]:
         generated_tokens = ""
 
         for i in range(20):
@@ -93,7 +87,7 @@ class Decoder:
 
         return float(generated_tokens), ids
 
-    def generate_string(self, ids):
+    def generate_string(self, ids: List[int]) -> Tuple[str, List[int]]:
         generated_tokens = ""
 
         for i in range(50):
@@ -114,14 +108,18 @@ class Decoder:
 
         return generated_tokens, ids
 
-    def predict_param(self, fn_name, functions, tokens):
+    def predict_param(
+            self, fn_name: str, functions: List[Any], tokens: List[int]
+            ) -> Dict[str, Any]:
+
         curr_ids = tokens
 
         fn_def = self.get_function_def(fn_name, functions)
-        params = {}
+        params: Dict[str, Any] = {}
 
         for i, (p_name, p_type) in enumerate(fn_def.parameters.items()):
             curr_ids += self.model.encode(f'"{p_name}": ').tolist()[0]
+            value: Union[str, float]
             if p_type.type == "string":
                 # curr_ids += self.model.encode('"').tolist()[0]
                 value, curr_ids = self.generate_string(curr_ids)

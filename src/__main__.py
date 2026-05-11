@@ -32,6 +32,8 @@ if __name__ == "__main__":
     #all available functions name.
     available_function_names = []
     for fun_name in funcs_list:
+        if not fun_name.name.startswith("fn_"):
+            sys.exit(f"error : the function {fun_name.name} should start with 'fn_'")
         available_function_names.append(fun_name.name)
     available_function_names.append("null")
 
@@ -52,28 +54,29 @@ if __name__ == "__main__":
     all_of_dict = []
     user_inp = "What is the sum of 2 and 3?"
 
+    print(available_function_names)
 
-    for p in prompts_list:
-        output = {
-            "prompt": None,
-            "name": None,
-            "parameters" : None
-        }
+    # for p in prompts_list:
+    #     output = {
+    #         "prompt": None,
+    #         "name": None,
+    #         "parameters" : None
+    #     }
 
-        #predict the name of function
-        addition = model.encode(f"Request: {user_inp}\nAnswer:\n").tolist()[0]
-        function_name = predictor.predict_name(name_prompt + addition)
-        if function_name == "null":
-            sys.exit("ERROR: the function doesn't exist")
+    #     #predict the name of function
+    #     addition = model.encode(f"Request: {user_inp}\nAnswer:\n").tolist()[0]
+    #     function_name = predictor.predict_name(name_prompt + addition)
+    #     if function_name == "null":
+    #         sys.exit("ERROR: the function doesn't exist")
 
-        #predict - param
-        param_addition = f"Function: {function_lookup["fn_add_numbers"].name}("
-        param_addition += ", ".join(f"{name}: {schema.type}" for name, schema in function_lookup["fn_add_numbers"].parameters.items())
-        param_addition += ")\n "
-        param_addition += f"Request: {user_inp}\n"
-        param_addition += "Answer:{\n"
-        param_addition = model.encode(param_addition).tolist()[0]
-        param = predictor.predict_param("fn_add_numbers", funcs_list, param_prompt + param_addition)
+    #     #predict - param
+    #     param_addition = f"Function: {function_lookup["fn_add_numbers"].name}("
+    #     param_addition += ", ".join(f"{name}: {schema.type}" for name, schema in function_lookup["fn_add_numbers"].parameters.items())
+    #     param_addition += ")\n "
+    #     param_addition += f"Request: {user_inp}\n"
+    #     param_addition += "Answer:{\n"
+    #     param_addition = model.encode(param_addition).tolist()[0]
+    #     param = predictor.predict_param("fn_add_numbers", funcs_list, param_prompt + param_addition)
 
 
     # measure time
