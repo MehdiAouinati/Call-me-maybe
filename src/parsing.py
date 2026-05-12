@@ -15,11 +15,3 @@ class FunctionDef(BaseModel):
 
 class FunctionCall(BaseModel):
     prompt: str
-    # name: str
-    # parameters: Dict[str, Union[str, float, int]]
-
-
-class output_format(BaseModel):
-    prompt: str
-    name: str
-    parameters: Dict[str, Union[str, float, int]]

@@ -1,62 +1,57 @@
-import numpy as np
-import json
-
-
 class BuildPrompt:
     def __init__(self, prompts, funcs):
         self.prompts = prompts
         self.funcs = funcs
 
     def build_prompt(self):
-        text = "You select the correct function name based on a user request.\n"
+        prompt = "You select the correct function name based on a user request"
+        prompt += ".\n"
 
-        text += "\nSTRICT RULES:\n"
-        text += "- Output ONLY the function name as plain text.\n"
-        text += "- Do NOT return JSON.\n"
-        text += "- Do NOT add quotes.\n"
-        text += "- Do NOT explain.\n"
+        prompt += "\nSTRICT RULES:\n"
+        prompt += "- Output ONLY the function name as plain text.\n"
+        prompt += "- Do NOT return JSON.\n"
+        prompt += "- Do NOT add quotes.\n"
+        prompt += "- Do NOT explain.\n"
 
-        text += "\nFUNCTION RULES:\n"
-        text += "- Choose ONLY from the available functions.\n"
-        text += "- Do NOT invent new function names.\n"
+        prompt += "\nFUNCTION RULES:\n"
+        prompt += "- Choose ONLY from the available functions.\n"
+        prompt += "- Do NOT invent new function names.\n"
 
-        text += "\nEDGE CASES:\n"
-        text += "- If the request is empty → return: null\n"
-        text += "- If no function matches → return: null\n"
+        prompt += "\nEDGE CASES:\n"
+        prompt += "- If the request is empty → return: null\n"
+        prompt += "- If no function matches → return: null\n"
 
-        text += "\nAVAILABLE FUNCTIONS:\n"
+        prompt += "\nAVAILABLE FUNCTIONS:\n"
 
         for fn in self.funcs:
-            text += f"- {fn["name"]}: {fn["description"]}\n"
+            prompt += f"- {fn["name"]}: {fn["description"]}\n"
 
-        text += "\nEXAMPLES:\n"
+        prompt += "\nEXAMPLES:\n"
 
-        text += "Request: What is the sum of 2 and 3?\n"
-        text += "Answer:\nfn_add_numbers\n\n"
+        prompt += "Request: What is the sum of 2 and 3?\n"
+        prompt += "Answer:\nfn_add_numbers\n\n"
 
-        text += "Request: Greet John\n"
-        text += "Answer:\nfn_greet\n\n"
+        prompt += "Request: Greet John\n"
+        prompt += "Answer:\nfn_greet\n\n"
 
-        text += "Request: Reverse the string \"hello\"\n"
-        text += "Answer:\nfn_reverse_string\n\n"
+        prompt += "Request: Reverse the string \"hello\"\n"
+        prompt += "Answer:\nfn_reverse_string\n\n"
 
-        text += "Request: What is the square root of 16?\n"
-        text += "Answer:\nfn_get_square_root\n\n"
+        prompt += "Request: What is the square root of 16?\n"
+        prompt += "Answer:\nfn_get_square_root\n\n"
 
-        text += "Request: Replace numbers in text\n"
-        text += "Answer:\nfn_substitute_string_with_regex\n\n"
+        prompt += "Request: Replace numbers in text\n"
+        prompt += "Answer:\nfn_substitute_string_with_regex\n\n"
 
-        text += "Request: Tell me a joke\n"
-        text += "Answer:\nnull\n\n"
+        prompt += "Request: Tell me a joke\n"
+        prompt += "Answer:\nnull\n\n"
 
-        text += "Request:\n"
-        text += "Answer:\nnull\n\n"
+        prompt += "Request:\n"
+        prompt += "Answer:\nnull\n\n"
 
-        text += "\nNow select the function name.\n"
-        # text += f"Request: {user_prompt}\n"
-        # text += "Answer:\n"
-        return text
+        prompt += "\nNow select the function name.\n"
 
+        return prompt
 
     def build_param_prompt(self):
         prompt = "You extract ONLY function parameters from a user request.\n"
@@ -113,20 +108,20 @@ class BuildPrompt:
         prompt += "Request: Calculate the square root of 144?\n"
         prompt += 'Answer:\n{"a": 144.0}\n'
 
-        prompt += "Function: fn_substitute_string_with_regex(source_string: string, regex: string, replacement: string)\n"
-        prompt += 'Request: Replace all numbers in "Hello 34 I\'m 233 years old" with NUMBERS\n'
-        prompt += 'Answer:\n{"source_string": "Hello 34 I\'m 233 years old", "regex": "\\d+", "replacement": "NUMBERS"}\n'
+        prompt += "Function: fn_substitute_string_with_regex(source_string:"
+        prompt += " string, regex: string, replacement: string)\n"
+        prompt += 'Request: Replace all numbers in '
+        prompt += '"Hello 34 I\'m 233 years old" with NUMBERS\n'
+        prompt += 'Answer:\n{"source_string": "Hello 34 I\'m 233 years old",'
+        prompt += ' "regex": "\\d+", "replacement": "NUMBERS"}\n'
 
-        prompt += "Function: fn_substitute_string_with_regex(source_string: string, regex: string, replacement: string)\n"
-        prompt += 'Request: Replace all vowels in "Programming is fun" with "*"\n'
-        prompt += 'Answer:\n{"source_string": "Programming is fun", "regex": "[aeiouAEIOU]", "replacement": "*"}\n'
+        prompt += "Function: fn_substitute_string_with_regex(source_string: "
+        prompt += "string, regex: string, replacement: string)\n"
+        prompt += 'Request: '
+        prompt += 'Replace all vowels in "Programming is fun" with "*"\n'
+        prompt += 'Answer:\n{"source_string": "Programming is fun",'
+        prompt += ' "regex": "[aeiouAEIOU]", "replacement": "*"}\n'
 
         prompt += "\nNow extract parameters for this request.\n"
 
-        # prompt += f"Function: {fn_def.name}("
-        # prompt += ", ".join(f"{name}: {schema.type}" for name, schema in fn_def.parameters.items())
-        # prompt += ")\n"
-
-        # prompt += f"Request: {user_prompt}\n"
-        # prompt += "Answer:{\n"
-        return prompt 
+        return prompt

@@ -2,7 +2,7 @@ import json
 import sys
 from . import parsing
 from pydantic import ValidationError
-from typing import Any, List
+from typing import List
 
 
 class Parse:
@@ -20,10 +20,13 @@ class Parse:
         functions = []
         for item in jsn:
             try:
+                if not all(key in item.keys() for key in ["name", "description", "parameters", "returns"]):
+                    sys.exit("Error: missing keys")
                 func = parsing.FunctionDef.model_validate(item)
                 functions.append(func)
             except ValidationError as e:
                 raise ValidationError(f"Validation error for item {item}: {e}")
+
         return functions
 
     def load_prompts(self, path: str) -> List[parsing.FunctionCall]:

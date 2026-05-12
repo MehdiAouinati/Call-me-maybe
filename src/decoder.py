@@ -1,14 +1,17 @@
 from typing import Any, Dict, List, Tuple, Union
 import numpy as np
+import sys
 
 
 class Decoder:
-    def __init__(self, functions: List[Any], model: Any) -> None:
+    def __init__(self, functions: List[Any], model: Any, function_lookup: Any) -> None:
         self.model = model
         self.funcs = functions
         self.all_fun: List[List[int]] = []
         self.convert()
         self.number_tokens_ids: List[List[int]] = self.build_number_tokens()
+
+        self._fn_map: Dict[str, Any] = function_lookup
 
         self.close = self.model.encode('}').tolist()[0][0]
         self.comma = self.model.encode(',').tolist()[0][0]
@@ -19,11 +22,7 @@ class Decoder:
             self.all_fun.append(check)
 
     def build_number_tokens(self) -> List[List[int]]:
-        arr = "0123456789.-,}"
-        num: List[List[int]] = []
-        for n in arr:
-            num.append(self.model.encode(n).tolist()[0])
-        return num
+        return [self.model.encode(n).tolist()[0] for n in "0123456789.-,}"]
 
     def valid_tokens_fn_name(self, generated_text: List[int]) -> List[int]:
         if not generated_text:
@@ -63,11 +62,6 @@ class Decoder:
 
         return self.model.decode(generated_tokens)
 
-    def get_function_def(self, fn_name: str, functions: List[Any]) -> Any:
-        for fun in functions:
-            if fun.name == fn_name:
-                return fun
-        return None
 
     def generate_number(self, ids: List[int]) -> Tuple[float, List[int]]:
         generated_tokens = ""
@@ -84,6 +78,8 @@ class Decoder:
                 break
             ids.append(next_token)
             generated_tokens += self.model.decode(next_token)
+            if len(generated_tokens) >= 10:
+                sys.exit("the number too much big")
 
         return float(generated_tokens), ids
 
@@ -114,7 +110,7 @@ class Decoder:
 
         curr_ids = tokens
 
-        fn_def = self.get_function_def(fn_name, functions)
+        fn_def = self._fn_map.get(fn_name)
         params: Dict[str, Any] = {}
 
         for i, (p_name, p_type) in enumerate(fn_def.parameters.items()):
