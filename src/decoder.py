@@ -4,13 +4,14 @@ import sys
 
 
 class Decoder:
-    def __init__(self, functions: List[Any], model: Any, function_lookup: Any) -> None:
+    def __init__(self, functions: List[Any], model: Any, function_lookup: Any, tokenizer) -> None:
         self.model = model
         self.funcs = functions
         self.all_fun: List[List[int]] = []
         self.convert()
         self.number_tokens_ids: List[List[int]] = self.build_number_tokens()
 
+        self.tokenizer = tokenizer
         self._fn_map: Dict[str, Any] = function_lookup
 
         self.close = self.model.encode('}').tolist()[0][0]
@@ -60,7 +61,7 @@ class Decoder:
             current_tokens.append(next_token)
             generated_tokens.append(next_token)
 
-        return self.model.decode(generated_tokens)
+        return self.tokenizer.decode(generated_tokens)
 
 
     def generate_number(self, ids: List[int]) -> Tuple[float, List[int]]:
@@ -77,7 +78,7 @@ class Decoder:
             if self.comma == next_token or self.close == next_token:
                 break
             ids.append(next_token)
-            generated_tokens += self.model.decode(next_token)
+            generated_tokens += self.tokenizer.decode(next_token)
             if len(generated_tokens) >= 10:
                 sys.exit("the number too much big")
 
@@ -89,7 +90,7 @@ class Decoder:
         for i in range(50):
             logits = self.model.get_logits_from_input_ids(ids)
             next_token = int(np.argmax(logits))
-            tokens = self.model.decode(next_token)
+            tokens = self.tokenizer.decode(next_token)
             # print(tokens)
             if '}' in tokens or ',' in tokens:
                 if '}' in tokens:
@@ -100,7 +101,7 @@ class Decoder:
                 ids.append(next_token)
                 break
             ids.append(next_token)
-            generated_tokens += self.model.decode(next_token)
+            generated_tokens += self.tokenizer.decode(next_token)
 
         return generated_tokens, ids
 
@@ -114,7 +115,7 @@ class Decoder:
         params: Dict[str, Any] = {}
 
         for i, (p_name, p_type) in enumerate(fn_def.parameters.items()):
-            curr_ids += self.model.encode(f'"{p_name}": ').tolist()[0]
+            curr_ids += self.tokenizer.encode(f'"{p_name}": ')
             value: Union[str, float]
             if p_type.type == "string":
                 # curr_ids += self.model.encode('"').tolist()[0]

@@ -3,6 +3,8 @@ from .buildPrompt import BuildPrompt
 from .decoder import Decoder
 from .loader import Parse
 from pydantic import ValidationError
+from .tokenizer import Toknizer
+from pathlib import Path
 import argparse
 import json
 import sys
@@ -17,7 +19,7 @@ if __name__ == "__main__":
     parse.add_argument(
         "--input",
         default="data/input/function_calling_tests.json")
-    # parse.add_argument("--output")
+    parse.add_argument("--output", default="data/output/function_calling_results.json")
     args = parse.parse_args()
     load = Parse()
     try:
@@ -30,6 +32,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     model = Small_LLM_Model()
+
+    t = Toknizer(model)
 
     #all available functions name.
     available_function_names = []
@@ -46,27 +50,27 @@ if __name__ == "__main__":
 
     #initialize
     createPrompt = BuildPrompt(prompts, funcs)
-    predictor = Decoder(available_function_names, model, function_lookup)
+    predictor = Decoder(available_function_names, model, function_lookup, t)
 
     #build prompts
     prompt_name = createPrompt.build_prompt()
     prompt_param = createPrompt.build_param_prompt()
-    name_prompt = model.encode(prompt_name).tolist()[0]
-    param_prompt = model.encode(prompt_param).tolist()[0]
+    name_prompt = t.encode(prompt_name)
+    param_prompt = t.encode(prompt_param)
+
 
     #save the data
     all_of_dict = []
-    user_inp = "Greet shrek"
+    user_inp = "What is the sum of 2 and 3?"
 
     start = time.time()
     for i, p in enumerate(prompts_list, start=1):
 
         # predict the name of function
-        addition = model.encode(f"Request: {p.prompt}\nAnswer:\n").tolist()[0]
+        addition = t.encode(f"Request: {p.prompt}\nAnswer:\n")
         function_name = predictor.predict_name(name_prompt + addition)
         if function_name == "null":
             sys.exit("ERROR: the function doesn't exist")
-        print(function_name)
 
         # predict - param
         param_addition = f"Function: {function_lookup[function_name].name}("
@@ -74,12 +78,11 @@ if __name__ == "__main__":
         param_addition += ")\n "
         param_addition += f"Request: {p.prompt}\n"
         param_addition += "Answer:{\n"
-        param_addition = model.encode(param_addition).tolist()[0]
+        param_addition = t.encode(param_addition)
         param = predictor.predict_param(function_name, funcs_list, param_prompt + param_addition)
-        print(param)
 
         # animation
-        print(f"\nfinish prompt {i} : {p.prompt}\n")
+        print(f"prompt {i}: finished\n")
 
         # add to json
         try:
@@ -92,26 +95,16 @@ if __name__ == "__main__":
         except (TypeError, OverflowError) as e:
             print("❌ Invalid JSON:", e)
 
-    json_string = json.dumps(my_dict, indent=4)
-    with open(json, 'r') as file:
-        json.dump(my_dict, file, indent=4)
-
 
     end = time.time()
     second = end - start
     minutes = second / 60
+    print(minutes)
 
+    output_path = Path(args.output)
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    
+    with open(output_path, "w") as file:
+        json.dump(all_of_dict, file, indent=4)
 
-    # measure time
-    # start = time.time()
-    # second = end - start
-    # minutes = second / 60
-    # print(minutes)
-
-    #convert to json
-
-    # new = json.dumps(all_of, indent=2)
-    # print(new)
