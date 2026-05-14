@@ -4,7 +4,9 @@ import sys
 
 
 class Decoder:
-    def __init__(self, functions: List[Any], model: Any, function_lookup: Any, tokenizer) -> None:
+    def __init__(
+        self, functions: List[Any], model: Any, function_lookup: Any, tokenizer
+            ) -> None:
         self.model = model
         self.funcs = functions
         self.all_fun: List[List[int]] = []
@@ -47,7 +49,7 @@ class Decoder:
         current_tokens = tokens
         generated_tokens: list[int] = []
 
-        for i in range(20):
+        for i in range(25):
             logits = self.model.get_logits_from_input_ids(current_tokens)
             mask = np.full_like(logits, float("-inf"))
             allowed = self.valid_tokens_fn_name(generated_tokens)
@@ -62,7 +64,6 @@ class Decoder:
             generated_tokens.append(next_token)
 
         return self.tokenizer.decode(generated_tokens)
-
 
     def generate_number(self, ids: List[int]) -> Tuple[float, List[int]]:
         generated_tokens = ""
@@ -79,19 +80,18 @@ class Decoder:
                 break
             ids.append(next_token)
             generated_tokens += self.tokenizer.decode(next_token)
-            if len(generated_tokens) >= 10:
-                sys.exit("the number too much big")
+            if len(generated_tokens) >= 13:
+                sys.exit("Error :the number too much big")
 
         return float(generated_tokens), ids
 
     def generate_string(self, ids: List[int]) -> Tuple[str, List[int]]:
         generated_tokens = ""
 
-        for i in range(50):
+        for i in range(60):
             logits = self.model.get_logits_from_input_ids(ids)
             next_token = int(np.argmax(logits))
             tokens = self.tokenizer.decode(next_token)
-            # print(tokens)
             if '}' in tokens or ',' in tokens:
                 if '}' in tokens:
                     before_quote = tokens.split('}')[0]
@@ -117,12 +117,11 @@ class Decoder:
         for i, (p_name, p_type) in enumerate(fn_def.parameters.items()):
             curr_ids += self.tokenizer.encode(f'"{p_name}": ')
             value: Union[str, float]
-            if p_type.type == "string":
-                # curr_ids += self.model.encode('"').tolist()[0]
+            if p_type.type == "number":
+                value, curr_ids = self.generate_number(curr_ids)
+            else:
                 value, curr_ids = self.generate_string(curr_ids)
                 value = value.strip().strip('"')
-            elif p_type.type == "number":
-                value, curr_ids = self.generate_number(curr_ids)
             params[p_name] = value
 
         return params

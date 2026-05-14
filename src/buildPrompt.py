@@ -1,11 +1,49 @@
 class BuildPrompt:
+    """Build text prompts used to select functions and extract params.
+
+    The `BuildPrompt` class constructs plain-text instructions intended
+    for an LLM that (1) selects the most appropriate function name for a
+    user request and (2) extracts only the function parameters as JSON.
+
+    Attributes
+    ----------
+    prompts : sequence
+        A sequence of prompt objects (not used directly by current
+        implementations but kept for extensibility).
+    funcs : sequence
+        Iterable of function metadata dicts/objects containing at least
+        ``name`` and ``description`` keys used to build the prompt.
+    """
+
     def __init__(self, prompts, funcs):
+        """Create a new BuildPrompt instance.
+
+        Parameters
+        ----------
+        prompts : sequence
+            Optional prompt templates or examples (may be unused).
+        funcs : sequence
+            Iterable of function metadata objects/dicts. Each item must
+            provide ``name`` and ``description`` attributes/keys.
+        """
         self.prompts = prompts
         self.funcs = funcs
 
     def build_prompt(self):
-        prompt = "You select the correct function name based on a user request"
-        prompt += ".\n"
+        """Construct the function-selection instruction prompt.
+
+        The returned string instructs the LLM to select exactly one
+        function name (or `null`) from the available functions. It
+        contains strict rules, examples, and the list of available
+        functions derived from ``self.funcs``.
+
+        Returns
+        -------
+        str
+            A multi-line prompt suitable for passing to a language model.
+        """
+        prompt = "You select the correct function name based on a user"
+        prompt += " request.\n"
 
         prompt += "\nSTRICT RULES:\n"
         prompt += "- Output ONLY the function name as plain text.\n"
@@ -24,7 +62,7 @@ class BuildPrompt:
         prompt += "\nAVAILABLE FUNCTIONS:\n"
 
         for fn in self.funcs:
-            prompt += f"- {fn["name"]}: {fn["description"]}\n"
+            prompt += f"- {fn['name']}: {fn['description']}\n"
 
         prompt += "\nEXAMPLES:\n"
 
@@ -54,6 +92,19 @@ class BuildPrompt:
         return prompt
 
     def build_param_prompt(self):
+        """Construct the parameter-extraction instruction prompt.
+
+        The returned string instructs the LLM to extract ONLY the raw
+        inputs required by a function and to return them as a valid JSON
+        object. The prompt contains strict rules about types, regex
+        formatting and examples demonstrating the expected output.
+
+        Returns
+        -------
+        str
+            A multi-line prompt suitable for passing to a language model
+            to extract function parameters.
+        """
         prompt = "You extract ONLY function parameters from a user request.\n"
 
         prompt += "\nSTRICT RULES:\n"
@@ -64,15 +115,19 @@ class BuildPrompt:
 
         prompt += "\nCRITICAL — NEVER EXECUTE THE FUNCTION:\n"
         prompt += "- Extract ONLY what the user provided as raw input.\n"
-        prompt += "- NEVER compute, reverse, sort, add, transform, square, or process the value.\n"
-        prompt += "- The function will be called separately — your job is ONLY to extract.\n"
-        prompt += "- 'square root of X' -> extract X as-is, do NOT compute √X\n"
-        prompt += "- 'asterisks' or 'an asterisk' -> use EXACTLY \"*\" (the character, not the word)\n"
-        prompt += "- 'reverse string X' -> extract X as-is, do NOT compute reversing\n"
-
+        prompt += "- NEVER compute, reverse, sort, add, transform, square,"
+        prompt += " or process the value.\n"
+        prompt += "- The function will be called separately — your job is"
+        prompt += " ONLY to extract.\n"
+        prompt += "- 'square root of X' -> extract X as-is,"
+        prompt += " do NOT compute √X\n"
+        prompt += "- 'asterisks' or 'an asterisk' -> use EXACTLY \"*\""
+        prompt += " (the character, not the word)\n"
+        prompt += "- 'reverse string X' -> extract X as-is,"
+        prompt += " do NOT compute reversing\n"
 
         prompt += "\nTYPE RULES:\n"
-        prompt += "- Numbers must be numeric (no quotes).\n"
+        prompt += "- Numbers or integers must be numeric (no quotes).\n"
         prompt += "- Strings must be valid JSON strings.\n"
 
         prompt += "\nREGEX RULES (VERY IMPORTANT):\n"
@@ -101,7 +156,8 @@ class BuildPrompt:
 
         prompt += "Function: fn_reverse_string(s: string)\n"
         prompt += "Request: Reverse the string 'hello'\n"
-        prompt += "# WARNING: Do NOT reverse the string. Extract 'hello' as-is.\n"
+        prompt += "# WARNING: Do NOT reverse the string."
+        prompt += " Extract 'hello' as-is.\n"
         prompt += 'Answer:\n{"s": "hello"}\n'
 
         # prompt += "Function: fn_get_square_root(a: number)\n"

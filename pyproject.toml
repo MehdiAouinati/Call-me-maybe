@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "flake8>=7.3.0",
+    "mypy>=2.1.0",
     "numpy>=2.4.4",
     "pydantic>=2.12.5",
     "torch>=2.11.0",
