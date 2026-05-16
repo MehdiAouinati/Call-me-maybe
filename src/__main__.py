@@ -29,8 +29,7 @@ if __name__ == "__main__":
         prompts_list = loader.load_prompts(args.input)
         funcs_list = loader.load_functions(args.functions_definition)
     except ValidationError as e:
-        print(e)
-        sys.exit(1)
+        sys.exit(e)
 
     prompts = [item.model_dump() for item in prompts_list]
     funcs = [item.model_dump() for item in funcs_list]
@@ -42,7 +41,6 @@ if __name__ == "__main__":
 
     function_lookup = {f.name: f for f in funcs_list}
 
-    #initialize
     createPrompt = BuildPrompt(prompts, funcs)
     predictor = Decoder(
         available_function_names, model, function_lookup, converting
@@ -51,7 +49,6 @@ if __name__ == "__main__":
     name_prompt = converting.encode(createPrompt.build_prompt())
     param_prompt = converting.encode(createPrompt.build_param_prompt())
 
-    #save the data
     all_of_dict = []
 
     start = time.time()
@@ -63,17 +60,16 @@ if __name__ == "__main__":
         elif lenght > 100:
             sys.exit("Error: prompt too much big")
 
-        print(f"Loading...", end="\r")
-        # predict the name of function
+        print("Loading...", end="\r")
+
         addition = converting.encode(f"Request: {p.prompt}\nAnswer:\n")
         function_name = predictor.predict_name(name_prompt + addition)
 
         if function_name == "null":
             sys.exit("ERROR: the function doesn't exist")
 
-        # predict - param
         fn = function_lookup[function_name]
-        fn_signature  = ", ".join(
+        fn_signature = ", ".join(
             f"{name}: {schema.type}" for name, schema in fn.parameters.items()
                 )
 
@@ -82,15 +78,13 @@ if __name__ == "__main__":
             f"Request: {p.prompt}\n"
             f"Answer:{{\n"
             )
-        
+
         param_tokens = converting.encode(param_prompt_text)
         param = predictor.predict_param(
             function_name, funcs_list, param_prompt + param_tokens)
 
-        # animation
         print(f"prompt {i}: finished\n")
 
-        # add to json
         try:
             json.dumps(param)
             all_of_dict.append({

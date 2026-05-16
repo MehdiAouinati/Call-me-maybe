@@ -5,7 +5,8 @@ import sys
 
 class Decoder:
     def __init__(
-        self, functions: List[Any], model: Any, function_lookup: Any, tokenizer
+        self, functions: List[Any], model: Any, function_lookup: Any,
+        tokenizer: Any
             ) -> None:
         self.model = model
         self.funcs = functions
@@ -112,6 +113,10 @@ class Decoder:
         curr_ids = tokens
 
         fn_def = self._fn_map.get(fn_name)
+
+        if fn_def is None:
+            sys.exit(f"Unknown function: {fn_name}")
+
         params: Dict[str, Any] = {}
 
         for i, (p_name, p_type) in enumerate(fn_def.parameters.items()):
