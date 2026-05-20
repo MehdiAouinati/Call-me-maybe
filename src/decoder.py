@@ -64,7 +64,7 @@ class Decoder:
             current_tokens.append(next_token)
             generated_tokens.append(next_token)
 
-        return self.tokenizer.decode(generated_tokens)
+        return str(self.tokenizer.decode(generated_tokens))
 
     def generate_number(self, ids: List[int]) -> Tuple[float, List[int]]:
         generated_tokens = ""
@@ -122,7 +122,7 @@ class Decoder:
         for i, (p_name, p_type) in enumerate(fn_def.parameters.items()):
             curr_ids += self.tokenizer.encode(f'"{p_name}": ')
             value: Union[str, float]
-            if p_type.type == "number":
+            if p_type.type in ["number", "degit"]:
                 value, curr_ids = self.generate_number(curr_ids)
             else:
                 value, curr_ids = self.generate_string(curr_ids)

@@ -1,3 +1,5 @@
+.PHONY: all install run debug clean lint
+
 all: run
 
 install:
@@ -7,29 +9,19 @@ run:
 	uv run python -m src
 
 debug:
-	uv run python -m pdb src/main.py
+	uv run python -m pdb -m src
 
 clean:
-	rm -rf __pycache__
-	rm -rf .mypy_cache
-	rm -rf .pytest_cache
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type d -name ".mypy_cache" -exec rm -rf {} +
+	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
-# lint:
-# 	cd src/ && flake8 --exclude=.venv .
-# 	cd src/ && mypy . \
-# 		--warn-return-any \
-# 		--warn-unused-ignores \
-# 		--ignore-missing-imports \
-# 		--disallow-untyped-defs \
-# 		--check-untyped-
-		
 lint:
-	cd src/ && flake8 --exclude=.venv .
-	cd src/ && mypy . --warn-return-any \
+	uv run flake8 src
+	uv run mypy src \
+		--warn-return-any \
 		--warn-unused-ignores \
 		--ignore-missing-imports \
 		--disallow-untyped-defs \
 		--check-untyped-defs \
 		--follow-imports=skip
-
-.PHONY: all install run debug clean lint

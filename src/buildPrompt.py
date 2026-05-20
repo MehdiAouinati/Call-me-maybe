@@ -1,3 +1,6 @@
+from typing import Any, Sequence
+
+
 class BuildPrompt:
     """Build text prompts used to select functions and extract params.
 
@@ -15,7 +18,9 @@ class BuildPrompt:
         ``name`` and ``description`` keys used to build the prompt.
     """
 
-    def __init__(self, prompts, funcs):
+    def __init__(
+        self, prompts: Sequence[Any], funcs: Sequence[dict[str, Any]]
+            ) -> None:
         """Create a new BuildPrompt instance.
 
         Parameters
@@ -29,7 +34,7 @@ class BuildPrompt:
         self.prompts = prompts
         self.funcs = funcs
 
-    def build_prompt(self):
+    def build_prompt(self) -> str:
         """Construct the function-selection instruction prompt.
 
         The returned string instructs the LLM to select exactly one
@@ -91,7 +96,7 @@ class BuildPrompt:
 
         return prompt
 
-    def build_param_prompt(self):
+    def build_param_prompt(self) -> str:
         """Construct the parameter-extraction instruction prompt.
 
         The returned string instructs the LLM to extract ONLY the raw
