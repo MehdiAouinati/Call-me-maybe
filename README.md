@@ -1,5 +1,3 @@
-*This project has been created as part of the 42 curriculum by maouinat.*
-
 # Call Me Maybe: Function Calling in Large Language Models
 
 ## Description
@@ -354,4 +352,3 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 **Author**: Mehdi Aouinati  
 **Last Updated**: May 2026  
-**Status**: Active Development
