@@ -280,7 +280,7 @@ Function: fn_add_numbers(a: number, b: number)
     ├── parsing.py                         # Pydantic data models
     └── tokenizer.py                             # encode and decode
 ```
-## What We Learned
+## What I Learned
 
 Through this project i gained practical experience with:
 
