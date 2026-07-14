@@ -256,69 +256,6 @@ Function: fn_add_numbers(a: number, b: number)
 5. Complex parameters ("Replace all numbers...") → `fn_replace(...)`
 
 
-## Example Usage
-
-### Basic Function Calling
-
-```python
-from llm_sdk import Small_LLM_Model
-from src.decoder import Decoder
-from src.loader import Parse
-from src.buildPrompt import BuildPrompt
-
-# Load data
-loader = Parse()
-functions = loader.load_functions("data/input/functions_definition.json")
-prompts = loader.load_prompts("data/input/function_calling_tests.json")
-
-# Initialize model and decoder
-model = Small_LLM_Model()
-available_names = [f.name for f in functions]
-decoder = Decoder(available_names, model)
-
-# Create prompts
-builder = BuildPrompt([p.model_dump() for p in prompts], 
-                      [f.model_dump() for f in functions])
-
-# Predict function call
-user_request = "What is the sum of 5 and 7?"
-function_name = decoder.predict_name(
-    model.encode(builder.build_prompt() + f"Request: {user_request}\nAnswer:\n").tolist()[0]
-)
-print(f"Function: {function_name}")
-
-# Extract parameters
-params = decoder.predict_param(function_name, functions, model.encode("").tolist()[0])
-print(f"Parameters: {params}")
-```
-
-### Processing Multiple Requests
-
-```bash
-# Run against test suite
-uv run python -m src.__main__ \
-  --functions_definition data/input/functions_definition.json \
-  --input data/input/function_calling_tests.json
-```
-
-## Resources
-
-### References on Function Calling
-
-- [OpenAI Function Calling Guide](https://platform.openai.com/docs/guides/gpt/function-calling)
-
-- [OpenAI Function Calling Guide](https://platform.openai.com/docs/guides/gpt/function-calling)
-
-- [Pydantic Documentation](https://docs.pydantic.dev/)
-
-- [NumPy Documentation](https://numpy.org/doc/)
-
-- [3Blue1Brown — Neural Networks (YouTube playlist)](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
-
-## AI Usage
-
-This project used AI only to help explain concepts and how some components work in the background.
-
 ## Project Structure
 
 ```
@@ -343,12 +280,19 @@ This project used AI only to help explain concepts and how some components work 
     ├── parsing.py                         # Pydantic data models
     └── tokenizer.py                             # encode and decode
 ```
+## What We Learned
 
-## License
+Through this project i gained practical experience with:
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+- How Large Language Models (LLMs) process and generate text.
+- Tokenization and how text is split into tokens.
+- Embeddings and vector representations of text.
+- Transformer-based inference pipelines.
+- Logits and next-token prediction.
+- Constrained Decoding and token masking.
+- Function Calling Systems and Structured Outputs.
+- Prompt Engineering and type-aware prompting.
+- Pydantic Validation and schema enforcement.
+- Software Architecture, Testing, and Debugging.
 
----
-
-**Author**: Mehdi Aouinati  
-**Last Updated**: May 2026  
+```
